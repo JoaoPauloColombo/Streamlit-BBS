@@ -24,17 +24,22 @@ def get_trends_data():
     pytrends = TrendReq(hl='pt-BR', tz=360)
     keywords = ["pizza", "massas", "sobremesa"]
     try:
-        # --- ALTERAÇÃO AQUI ---
-        # Período de busca alterado DE VOLTA para 'today 3-m' (3 meses)
         pytrends.build_payload(keywords, cat=0, timeframe='today 3-m', geo='BR', gprop='')
-        
         df_trends = pytrends.interest_over_time().reset_index()
-        df_trends = df_trends.rename(columns={'date': 'Data_Pedido', 'pizza': 'trend_pizza', 'massas': 'trend_massas', 'sobremesa': 'trend_sobremesa'})
+        df_trends = df_trends.rename(columns={
+            'date': 'Data_Pedido',
+            'pizza': 'trend_pizza',
+            'massas': 'trend_massas',
+            'sobremesa': 'trend_sobremesa'
+        })
         df_trends['Data_Pedido'] = pd.to_datetime(df_trends['Data_Pedido']).dt.tz_localize(None)
         return df_trends[['Data_Pedido', 'trend_pizza', 'trend_massas', 'trend_sobremesa']]
+    
     except Exception as e:
-        st.error(f"Erro ao buscar dados do Google Trends: {e}. Tente novamente mais tarde.")
+        # Apenas loga no terminal, sem mostrar erro visual no app
+        print(f"[Aviso] Erro ao buscar dados do Google Trends: {e}")
         return pd.DataFrame()
+
 
 df_raw = load_data()
 df_trends = get_trends_data()
